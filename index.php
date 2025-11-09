@@ -3366,15 +3366,6 @@ if ($vod_id > 0 && isset($vod_detail)) {
             }
         });
 
-        // 修复：下载资源搜索和分页功能
-        document.addEventListener('DOMContentLoaded', function() {
-            // 初始化下载资源搜索和分页
-            initializeDownloadSearchAndPagination();
-            
-            // 初始化剧集搜索和分页
-            initializeEpisodeSearchAndPagination();
-        });
-        
         // 修复：初始化下载资源搜索和分页功能
         function initializeDownloadSearchAndPagination() {
             // 处理下载资源搜索
@@ -3531,8 +3522,11 @@ if ($vod_id > 0 && isset($vod_detail)) {
         function paginateDownloadItems(sourceIndex, action) {
             const itemsPerPage = getDownloadItemsPerPage(sourceIndex);
             const currentPage = getDownloadCurrentPage(sourceIndex);
-            const totalItems = getDownloadTotalItems(sourceIndex);
-            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const downloadList = document.getElementById('download-list-' + sourceIndex);
+            const downloadItems = downloadList.querySelectorAll('.episode-download');
+            const visibleItems = Array.from(downloadItems).filter(item => item.style.display !== 'none');
+            const totalItems = visibleItems.length;
+            const totalPages = itemsPerPage === 0 ? 1 : Math.ceil(totalItems / itemsPerPage);
             
             let newPage = currentPage;
             
@@ -3542,15 +3536,18 @@ if ($vod_id > 0 && isset($vod_detail)) {
                 newPage = currentPage + 1;
             }
             
-            updateDownloadPagination(sourceIndex, newPage, itemsPerPage);
+            updateDownloadPagination(sourceIndex, newPage, itemsPerPage, totalItems);
         }
         
         // 修复：剧集分页
         function paginateEpisodeItems(sourceIndex, action) {
             const itemsPerPage = getEpisodeItemsPerPage(sourceIndex);
             const currentPage = getEpisodeCurrentPage(sourceIndex);
-            const totalItems = getEpisodeTotalItems(sourceIndex);
-            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const episodeGrid = document.querySelector('.episode-grid[data-source-index="' + sourceIndex + '"]');
+            const episodeItems = episodeGrid.querySelectorAll('.play-episode');
+            const visibleItems = Array.from(episodeItems).filter(item => item.style.display !== 'none');
+            const totalItems = visibleItems.length;
+            const totalPages = itemsPerPage === 0 ? 1 : Math.ceil(totalItems / itemsPerPage);
             
             let newPage = currentPage;
             
@@ -3560,7 +3557,7 @@ if ($vod_id > 0 && isset($vod_detail)) {
                 newPage = currentPage + 1;
             }
             
-            updateEpisodePagination(sourceIndex, newPage, itemsPerPage);
+            updateEpisodePagination(sourceIndex, newPage, itemsPerPage, totalItems);
         }
         
         // 修复：更新下载资源分页
@@ -3744,9 +3741,16 @@ if ($vod_id > 0 && isset($vod_detail)) {
             });
         }
         
-        // 页面加载完成后初始化分页
+        // 页面加载完成后初始化所有功能
         document.addEventListener('DOMContentLoaded', function() {
+            // 初始化分页功能
             initializeAllPagination();
+            
+            // 初始化下载资源搜索和分页
+            initializeDownloadSearchAndPagination();
+            
+            // 初始化剧集搜索和分页
+            initializeEpisodeSearchAndPagination();
         });
 
         // 播放剧集功能
@@ -3994,6 +3998,43 @@ if ($vod_id > 0 && isset($vod_detail)) {
                      currentEpisode.getAttribute('data-episode-name'),
                      currentEpisode.getAttribute('data-vod-pic'));
         });
+        
+        // 页面跳转功能
+        const pageJumpBtn = document.getElementById('page-jump-btn');
+        const pageJumpInput = document.getElementById('page-jump-input');
+        
+        if (pageJumpBtn && pageJumpInput) {
+            pageJumpBtn.addEventListener('click', function() {
+                const targetPage = parseInt(pageJumpInput.value);
+                const maxPage = parseInt(pageJumpInput.getAttribute('max'));
+                
+                if (targetPage >= 1 && targetPage <= maxPage) {
+                    // 构建新的URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    
+                    // 获取现有参数
+                    const keyword = urlParams.get('keyword');
+                    const typeId = urlParams.get('type_id');
+                    
+                    // 设置新的页码
+                    urlParams.set('page', targetPage);
+                    
+                    // 构建最终URL
+                    let newUrl = '?' + urlParams.toString();
+                    
+                    window.location.href = newUrl;
+                } else {
+                    alert('请输入有效的页码（1-' + maxPage + '）');
+                }
+            });
+            
+            // 支持回车键跳转
+            pageJumpInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    pageJumpBtn.click();
+                }
+            });
+        }
     </script>
 </body>
 </html>
