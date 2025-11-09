@@ -1321,10 +1321,16 @@ if ($vod_id > 0 && isset($vod_detail)) {
             cursor: pointer;
             font-size: 16px;
             display: none;
+            padding: 4px;
+            line-height: 1;
         }
-        
+
+        .episode-search-clear:hover {
+            color: var(--primary-color);
+        }
+
         .episode-search-clear.show {
-            display: block;
+            display: inline-block;
         }
         
         .episode-pagination {
@@ -1479,10 +1485,16 @@ if ($vod_id > 0 && isset($vod_detail)) {
             cursor: pointer;
             font-size: 16px;
             display: none;
+            padding: 4px;
+            line-height: 1;
         }
-        
+
         .download-search-clear:hover {
             color: var(--primary-color);
+        }
+
+        .download-search-clear.show {
+            display: inline-block;
         }
         
         .download-pagination {
@@ -2636,12 +2648,12 @@ if ($vod_id > 0 && isset($vod_detail)) {
                                 <div class="episode-controls">
                                     <div class="episode-search">
                                         <input type="text" class="episode-search-input" data-source-index="<?php echo $source_index; ?>" placeholder="搜索剧集...">
-                                        <button class="episode-search-clear" data-source-index="<?php echo $source_index; ?>">×</button>
+                                        <button type="button" class="episode-search-clear" data-source-index="<?php echo $source_index; ?>">×</button>
                                     </div>
                                     <div class="episode-pagination">
-                                        <button class="episode-pagination-btn" data-action="prev" data-source-index="<?php echo $source_index; ?>">上一页</button>
+                                        <button type="button" class="episode-pagination-btn" data-action="prev" data-source-index="<?php echo $source_index; ?>">上一页</button>
                                         <span class="episode-pagination-info" data-source-index="<?php echo $source_index; ?>">1/1</span>
-                                        <button class="episode-pagination-btn" data-action="next" data-source-index="<?php echo $source_index; ?>">下一页</button>
+                                        <button type="button" class="episode-pagination-btn" data-action="next" data-source-index="<?php echo $source_index; ?>">下一页</button>
                                         <select class="episode-group-selector" data-source-index="<?php echo $source_index; ?>">
                                             <option value="20">每页20集</option>
                                             <option value="40">每页40集</option>
@@ -2682,12 +2694,12 @@ if ($vod_id > 0 && isset($vod_detail)) {
                                     <div class="download-controls" id="download-controls-<?php echo $source_index; ?>">
                                         <div class="download-search">
                                             <input type="text" class="download-search-input" data-source-index="<?php echo $source_index; ?>" placeholder="在 <?php echo $source['source']; ?> 中搜索下载资源...">
-                                            <button class="download-search-clear" data-source-index="<?php echo $source_index; ?>">×</button>
+                                            <button type="button" class="download-search-clear" data-source-index="<?php echo $source_index; ?>">×</button>
                                         </div>
                                         <div class="download-pagination">
-                                            <button class="download-pagination-btn" data-action="prev" data-source-index="<?php echo $source_index; ?>">上一页</button>
+                                            <button type="button" class="download-pagination-btn" data-action="prev" data-source-index="<?php echo $source_index; ?>">上一页</button>
                                             <span class="download-pagination-info" data-source-index="<?php echo $source_index; ?>">1/1</span>
-                                            <button class="download-pagination-btn" data-action="next" data-source-index="<?php echo $source_index; ?>">下一页</button>
+                                            <button type="button" class="download-pagination-btn" data-action="next" data-source-index="<?php echo $source_index; ?>">下一页</button>
                                             <select class="download-group-selector" data-source-index="<?php echo $source_index; ?>">
                                                 <option value="10">每页10个</option>
                                                 <option value="20">每页20个</option>
@@ -3047,6 +3059,10 @@ if ($vod_id > 0 && isset($vod_detail)) {
     <!-- JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // 定义常量
+        const ITEMS_PER_PAGE = 20;
+        const DOWNLOAD_ITEMS_PER_PAGE = <?php echo DOWNLOAD_ITEMS_PER_PAGE; ?>;
+        
         // 更新日期和时间
         function updateDateTime() {
             const now = new Date();
@@ -3380,7 +3396,7 @@ if ($vod_id > 0 && isset($vod_detail)) {
                     
                     // 显示/隐藏清除按钮
                     if (searchTerm.length > 0) {
-                        clearBtn.style.display = 'block';
+                        clearBtn.style.display = 'inline-block';
                     } else {
                         clearBtn.style.display = 'none';
                     }
@@ -3392,7 +3408,8 @@ if ($vod_id > 0 && isset($vod_detail)) {
             
             // 下载资源搜索清除按钮
             downloadSearchClears.forEach(btn => {
-                btn.addEventListener('click', function() {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
                     const sourceIndex = this.getAttribute('data-source-index');
                     const searchInput = document.querySelector('.download-search-input[data-source-index="' + sourceIndex + '"]');
                     searchInput.value = '';
@@ -3404,7 +3421,8 @@ if ($vod_id > 0 && isset($vod_detail)) {
             // 下载资源分页按钮
             const downloadPaginationBtns = document.querySelectorAll('.download-pagination-btn');
             downloadPaginationBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
                     const action = this.getAttribute('data-action');
                     const sourceIndex = this.getAttribute('data-source-index');
                     paginateDownloadItems(sourceIndex, action);
@@ -3414,7 +3432,7 @@ if ($vod_id > 0 && isset($vod_detail)) {
             // 下载资源每页显示数量选择
             const downloadGroupSelectors = document.querySelectorAll('.download-group-selector');
             downloadGroupSelectors.forEach(selector => {
-                selector.addEventListener('change', function() {
+                selector.addEventListener('change', function(e) {
                     const sourceIndex = this.getAttribute('data-source-index');
                     const itemsPerPage = parseInt(this.value);
                     updateDownloadPagination(sourceIndex, 1, itemsPerPage);
@@ -3436,7 +3454,7 @@ if ($vod_id > 0 && isset($vod_detail)) {
                     
                     // 显示/隐藏清除按钮
                     if (searchTerm.length > 0) {
-                        clearBtn.style.display = 'block';
+                        clearBtn.style.display = 'inline-block';
                     } else {
                         clearBtn.style.display = 'none';
                     }
@@ -3448,7 +3466,8 @@ if ($vod_id > 0 && isset($vod_detail)) {
             
             // 剧集搜索清除按钮
             episodeSearchClears.forEach(btn => {
-                btn.addEventListener('click', function() {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
                     const sourceIndex = this.getAttribute('data-source-index');
                     const searchInput = document.querySelector('.episode-search-input[data-source-index="' + sourceIndex + '"]');
                     searchInput.value = '';
@@ -3460,7 +3479,8 @@ if ($vod_id > 0 && isset($vod_detail)) {
             // 剧集分页按钮
             const episodePaginationBtns = document.querySelectorAll('.episode-pagination-btn');
             episodePaginationBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
                     const action = this.getAttribute('data-action');
                     const sourceIndex = this.getAttribute('data-source-index');
                     paginateEpisodeItems(sourceIndex, action);
@@ -3470,7 +3490,7 @@ if ($vod_id > 0 && isset($vod_detail)) {
             // 剧集每页显示数量选择
             const episodeGroupSelectors = document.querySelectorAll('.episode-group-selector');
             episodeGroupSelectors.forEach(selector => {
-                selector.addEventListener('change', function() {
+                selector.addEventListener('change', function(e) {
                     const sourceIndex = this.getAttribute('data-source-index');
                     const itemsPerPage = parseInt(this.value);
                     updateEpisodePagination(sourceIndex, 1, itemsPerPage);
@@ -3730,14 +3750,22 @@ if ($vod_id > 0 && isset($vod_detail)) {
             const downloadControls = document.querySelectorAll('.download-controls');
             downloadControls.forEach(control => {
                 const sourceIndex = control.id.split('-')[2];
-                updateDownloadPagination(sourceIndex, 1, getDownloadItemsPerPage(sourceIndex));
+                const downloadList = document.getElementById('download-list-' + sourceIndex);
+                if (downloadList) {
+                    const totalItems = downloadList.querySelectorAll('.episode-download').length;
+                    updateDownloadPagination(sourceIndex, 1, getDownloadItemsPerPage(sourceIndex), totalItems);
+                }
             });
-            
+
             // 初始化剧集分页
             const episodeControls = document.querySelectorAll('.episode-controls');
             episodeControls.forEach(control => {
                 const sourceIndex = control.querySelector('.episode-search-input').getAttribute('data-source-index');
-                updateEpisodePagination(sourceIndex, 1, getEpisodeItemsPerPage(sourceIndex));
+                const episodeGrid = document.querySelector('.episode-grid[data-source-index="' + sourceIndex + '"]');
+                if (episodeGrid) {
+                    const totalItems = episodeGrid.querySelectorAll('.play-episode').length;
+                    updateEpisodePagination(sourceIndex, 1, getEpisodeItemsPerPage(sourceIndex), totalItems);
+                }
             });
         }
         
